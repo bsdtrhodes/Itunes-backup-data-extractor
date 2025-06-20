@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>iExtractor Help</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            padding: 20px;
+        }
+        h1 {
+            color: #2e6da4;
+        }
+        .section {
+            margin-bottom: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <h1>iExtractor - Help</h1>
+    <div class="section">
+        <h2>Extracting Data</h2>
+	<p>Click the File menu drop down and click "Select Backup Directory" to set the iTunes backup directory. On Windows, this
+	is currently in <b>C:\users\%USER%\Apple\MobileSync\Backup</b> with a random directory name. Some users may have more
+	than a single directory. I have three and so I go to the most recently created one. Once you reach the directory,
+	just select "Choose Folder" and the drop down will show a check mark. The check mark shows you have selected a backup
+	directory and proceed to the next step.</p>
+	<p>Click the File menu drop down and click "Select Export Directory" to se the restore location on the local system. The
+	backup contains a great deal of data, including photos, videos, text messages and more. Any directory you choose will
+	have a finalized set of voicemail files, image directories, and HTML reports. Images are not exported with the backup's
+	initial run - to extract them, run a backup and then view the images by pressing the button associated with images.</p>
+        <p>Click the File Menu drop down and click "Perform Extraction" to begin the extraction process.</p>
+	<p>If the backup was encrypted, a prompt will appear requesting that you enter your password. If the wrong password is
+	entered, errors will be displayed.</p>
+    </div>
+    <div class="section">
+        <h2>Getting Password Hashes</h2>
+        <p>Click the Reports menu drop down and click "Dump Hashes" to begin this process. A pop-up box will ask you to select the
+	iTunes backup directory. Password hashes will already be in a format that Hashcat can read, place them into a text file and
+	pass them to Hashcat.</p>
+    </div>
+    <div class="section">
+	<h2>Generating a Report</h2>
+	<p>iExtractor comes with the ability to generate reports. To create a report, click the Reports drop down and click "Create Report" prior
+	running an extraction. This will create a text file report which can be viewed inside the applicating using the Clipboard image or a
+	text file report inside the export directory.</p>
+	<p>In addition to the report file, a group of CSV files will be placed in the directory. They contain raw data in CSV (comma separated
+	values) format that could be imported into an application such as LibreOffice, Microsoft Office, or any text editor. They could be
+	manipulated on the command line using sed and awk or Windows Power Shell.</p>
+    </div>
+    <div class=section">
+	<h2>Errors</h2>
+	<p>If you encounter an error performing extractions, please ensure that both the Backup and Export directories were set. If the error
+	persists, please double check the unlock password being used. If error is encountered again, please look for an iExtractor.log file.
+	It will be in the launch directory, and send it to me for review. I have attempted to test this application on Windows 10,
+	FreeBSD, Linux, and Apple OSX. Unfortunately, I cannot test every edge case and situation and I imagine different environments or
+	character encodings could cause issues.</p>
+    </div>
+</body>
+</html>

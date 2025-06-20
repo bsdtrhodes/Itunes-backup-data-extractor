@@ -1,0 +1,82 @@
+/* Global app styling */
+.root {
+    -fx-font-family: "Segoe UI", "Lucida Sans Unicode", "Arial", sans-serif;
+    -fx-font-size: 13px;
+    -fx-background-color: #f5f7fa; /* Light neutral background */
+    -fx-text-fill: #333;
+}
+
+/* Labels */
+.label {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+/* Buttons */
+.button {
+    -fx-background-color: linear-gradient(to bottom, #eeeeee, #cccccc);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 15 8 15;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 4, 0, 0, 1);
+}
+.button:hover {
+    -fx-background-color: linear-gradient(to bottom, #2980b9, #3498db);
+}
+
+/* Text fields and areas */
+.text-field, .text-area {
+    -fx-background-color: white;
+    -fx-border-color: #dcdcdc;
+    -fx-border-radius: 4;
+    -fx-padding: 6;
+    -fx-text-fill: #333;
+}
+
+/* TextArea specifically */
+.text-area {
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 12px;
+    -fx-wrap-text: true;
+}
+
+/* Title text (like product name splash) */
+.title-text {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #34495e;
+}
+
+/* VBox and layout padding */
+.vbox, .hbox {
+    -fx-spacing: 10;
+    -fx-padding: 15;
+}
+
+/* Close button or action buttons */
+.button-close {
+    -fx-background-color: #e74c3c;
+}
+.button-close:hover {
+    -fx-background-color: #c0392b;
+}
+
+/* Menu bar (if used) */
+.menu-bar {
+    -fx-background-color: #ecf0f1;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* Alert-style popups */
+.dialog-pane {
+    -fx-background-color: #ffffff;
+}
+.dialog-pane .content {
+    -fx-text-fill: #333;
+}
+.dialog-pane .header-panel {
+    -fx-background-color: #3498db;
+}

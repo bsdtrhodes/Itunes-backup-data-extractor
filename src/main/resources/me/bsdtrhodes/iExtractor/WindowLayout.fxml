@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright (c) 2015, 2019, Gluon and/or its affiliates.
+  All rights reserved. Use is subject to license terms.
+
+  This file is available and licensed under the following license:
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+
+  - Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the distribution.
+  - Neither the name of Oracle Corporation nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.effect.Glow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.paint.RadialGradient?>
+<?import javafx.scene.paint.Stop?>
+<?import javafx.scene.text.Font?>
+
+<VBox fx:id="VBox" prefHeight="615.0" prefWidth="672.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="me.bsdtrhodes.iExtractor.Controller">
+  <children>
+    <MenuBar fx:id="MenuBar" VBox.vgrow="NEVER">
+      <menus>
+        <Menu fx:id="FileMenu" mnemonicParsing="false" text="File">
+          <items>
+            <MenuItem id="setbackup" fx:id="setBackupLocation" mnemonicParsing="false" onAction="#doSetBackupFile" text="Select Backup Directory" />
+            <MenuItem fx:id="setExportLocation" mnemonicParsing="false" onAction="#doSetExtractDir" text="Set Export Directory" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem fx:id="BeginExport" mnemonicParsing="false" onAction="#doExtraction" text="Perform Extraction" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem fx:id="MenuQuit" mnemonicParsing="false" onAction="#MenuQuitOption" text="Quit" />
+          </items>
+        </Menu>
+            <Menu mnemonicParsing="false" text="Reports">
+              <items>
+                <MenuItem fx:id="setReporting" mnemonicParsing="false" onAction="#doCreateReport" text="Create Report" />
+                  <MenuItem mnemonicParsing="false" onAction="#doHashDump" text="Dump Hashes" />
+              </items>
+            </Menu>
+        <Menu fx:id="HelpMenu" mnemonicParsing="false" text="Help">
+          <items>
+            <MenuItem id="AboutMenu" fx:id="AboutMenu" mnemonicParsing="false" onAction="#doShowAbout" text="About" />
+                  <MenuItem id="HelpHelp" mnemonicParsing="false" onAction="#doShowHelp" text="Help" />
+          </items>
+        </Menu>
+      </menus>
+    </MenuBar>
+    <AnchorPane fx:id="MainAnchorPane" maxHeight="-1.0" maxWidth="-1.0" prefHeight="427.0" prefWidth="696.0" VBox.vgrow="ALWAYS">
+      <children>
+        <Label alignment="CENTER" layoutX="155.0" layoutY="177.0" style="&#10;" textAlignment="CENTER" textFill="#9f9f9f" wrapText="false">
+          <font>
+            <Font size="18.0" />
+          </font>
+        </Label>
+            <Button fx:id="reportBTN" layoutX="249.0" layoutY="365.0" mnemonicParsing="false" onAction="#doShowReport" prefHeight="159.0" prefWidth="149.0" text="Report" textOverrun="CLIP">
+               <graphic>
+                  <ImageView fitHeight="151.0" fitWidth="135.0">
+                     <image>
+                        <Image url="@images/clipboard.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Display Report" />
+               </tooltip>
+            </Button>
+            <Button fx:id="mediaBTN" layoutX="260.0" layoutY="25.0" mnemonicParsing="false" onAction="#doExtractMedia" prefHeight="82.0" prefWidth="119.0" text="Media" textOverrun="CLIP">
+               <graphic>
+                  <ImageView fitHeight="110.0" fitWidth="117.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@images/imagegallery.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Extract Media" />
+               </tooltip>
+            </Button>
+            <Button fx:id="voicemailBTN" layoutX="260.0" layoutY="204.0" mnemonicParsing="false" onAction="#doExtractVoicemail" prefHeight="82.0" prefWidth="119.0" text="Extract Voicemails" textOverrun="CLIP">
+               <graphic>
+                  <ImageView fitHeight="116.0" fitWidth="125.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@images/voicemail.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Extract Voicemails" />
+               </tooltip>
+            </Button>
+            <Button id="CallHistory" fx:id="callHistoryBTN" layoutX="466.0" layoutY="205.0" mnemonicParsing="false" onAction="#doShowCallHistory" prefHeight="124.0" prefWidth="138.0" text="CallHistory" textOverrun="CLIP">
+               <textFill>
+                  <RadialGradient centerX="0.5" centerY="0.5" radius="0.5">
+                     <stops>
+                        <Stop>
+                           <color>
+                              <Color red="0.8631578683853149" green="0.8120077848434448" blue="0.8120077848434448" />
+                           </color>
+                        </Stop>
+                        <Stop offset="1.0">
+                           <color>
+                              <Color red="1.0" green="1.0" blue="1.0" />
+                           </color>
+                        </Stop>
+                     </stops>
+                  </RadialGradient>
+               </textFill>
+               <graphic>
+                  <ImageView fitHeight="110.0" fitWidth="145.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@images/phone-call.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Extract Call History" />
+               </tooltip>
+            </Button>
+            <Button fx:id="webBTN" layoutX="466.0" layoutY="25.0" mnemonicParsing="false" onAction="#doExtractWeb" prefHeight="82.0" prefWidth="119.0" text="Extract Web History" textOverrun="CLIP">
+               <graphic>
+                  <ImageView fitHeight="116.0" fitWidth="124.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@images/internet.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Extract Safari History" />
+               </tooltip>
+            </Button>
+            <Button fx:id="contactsBTN" layoutX="46.0" layoutY="25.0" mnemonicParsing="false" onAction="#doExtractContacts" prefHeight="82.0" prefWidth="119.0" text="Extract Contacts" textOverrun="CLIP">
+               <graphic>
+                  <ImageView fitHeight="109.0" fitWidth="111.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@images/contacts.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Extract Contacts" />
+               </tooltip>
+            </Button>
+            <Button fx:id="messagesBTN" layoutX="46.0" layoutY="204.0" mnemonicParsing="false" onAction="#doExtractMessages" prefHeight="82.0" prefWidth="119.0" text="Extract Messages" textOverrun="CLIP">
+               <graphic>
+                  <ImageView fitHeight="108.0" fitWidth="112.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@images/messages.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Extract Messages" />
+               </tooltip>
+            </Button>
+      </children>
+    </AnchorPane>
+  </children>
+   <effect>
+      <Glow />
+   </effect>
+</VBox>
