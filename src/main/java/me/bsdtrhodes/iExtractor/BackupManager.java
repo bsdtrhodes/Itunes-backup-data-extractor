@@ -236,10 +236,6 @@ public class BackupManager extends Phone {
 				self.decryptedDatabaseFile, self.iPhone);
 		contactsDB.extract(FilePairManager.CONTACTS
 				.getDecryptedPath(self.restoreLocation));
-		if (! ContextManager.getDebug()) {
-			cleanupManager.markForCleanup(FilePairManager.CONTACTS
-				.getDecryptedPath(self.restoreLocation));
-		}
 
 		EncryptedFile txtMessagesDB = new
 			EncryptedFile(FilePairManager.MESSAGES
@@ -248,10 +244,6 @@ public class BackupManager extends Phone {
 				self.iPhone);
 		txtMessagesDB.extract(FilePairManager.MESSAGES
 				.getDecryptedPath(self.restoreLocation));
-		if (! ContextManager.getDebug()) {
-			cleanupManager.markForCleanup(FilePairManager.MESSAGES
-				.getDecryptedPath(self.restoreLocation));
-		}
 
 		EncryptedFile voicemailsDB = new
 				EncryptedFile(FilePairManager.VOICEMAILS
@@ -260,10 +252,7 @@ public class BackupManager extends Phone {
 				self.iPhone);
 		voicemailsDB.extract(FilePairManager.VOICEMAILS
 				.getDecryptedPath(self.restoreLocation));
-		if (! ContextManager.getDebug()) {
-			cleanupManager.markForCleanup(FilePairManager.VOICEMAILS
-				.getDecryptedPath(self.restoreLocation));
-		}
+
 
 		EncryptedFile safariHistoryDB = new
 				EncryptedFile(FilePairManager.SAFARI
@@ -271,10 +260,6 @@ public class BackupManager extends Phone {
 				self.decryptedDatabaseFile, self.iPhone);
 		safariHistoryDB.extract(FilePairManager.SAFARI
 				.getDecryptedPath(self.restoreLocation));
-		if (! ContextManager.getDebug()) {
-			cleanupManager.markForCleanup(FilePairManager.SAFARI
-				.getDecryptedPath(self.restoreLocation));
-		}
 
 		EncryptedFile callLog = new
 				EncryptedFile(FilePairManager.CALLS
@@ -282,16 +267,7 @@ public class BackupManager extends Phone {
 				self.decryptedDatabaseFile, self.iPhone);
 		callLog.extract(FilePairManager.CALLS
 				.getDecryptedPath(self.restoreLocation));
-		if (! ContextManager.getDebug()) {
-			cleanupManager.markForCleanup(FilePairManager.CALLS
-				.getDecryptedPath(self.restoreLocation));
-		}
 
-		/* Finally, register the main database (Manifest) for cleanup. */
-		if (! ContextManager.getDebug()) {
-			cleanupManager.markForCleanup(FilePairManager.MANIFEST
-				.getDecryptedPath(self.restoreLocation));
-		}
 
 		/* XXX: Get XML data for the report. - Move to reporting.
 		File myPlist = new File(backupLocation + File.separator
@@ -310,6 +286,38 @@ public class BackupManager extends Phone {
 		} else {
 			/* Could probably just be a different "new" manager. */
 			self.decryptedDatabaseFile = self.manifestDBFile;
+		}
+
+		/* Register files for cleanup */
+		if (! ContextManager.getDebug()) {
+			cleanupManager.markForCleanup(FilePairManager.CONTACTS
+			.getDecryptedPath(self.restoreLocation));
+		}
+
+		if (! ContextManager.getDebug()) {
+			cleanupManager.markForCleanup(FilePairManager.MESSAGES
+			.getDecryptedPath(self.restoreLocation));
+		}
+
+		if (! ContextManager.getDebug()) {
+			cleanupManager.markForCleanup(FilePairManager.VOICEMAILS
+			.getDecryptedPath(self.restoreLocation));
+		}
+
+		if (! ContextManager.getDebug()) {
+			cleanupManager.markForCleanup(FilePairManager.SAFARI
+			.getDecryptedPath(self.restoreLocation));
+		}
+
+		if (! ContextManager.getDebug()) {
+			cleanupManager.markForCleanup(FilePairManager.CALLS
+			.getDecryptedPath(self.restoreLocation));
+		}
+
+		/* Finally, register the main database (Manifest) for cleanup. */
+		if (! ContextManager.getDebug()) {
+			cleanupManager.markForCleanup(FilePairManager.MANIFEST
+			.getDecryptedPath(self.restoreLocation));
 		}
 
 		/* Create extraction directory hierarchy. */
