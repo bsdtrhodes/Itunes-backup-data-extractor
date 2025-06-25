@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -157,7 +158,7 @@ public class BackupManager extends Phone {
 		throws ExceptionManager, NoSuchAlgorithmException,
 		IOException, InvalidKeyException {
 
-	this.manifestDBFile = FilePairManager.MANIFEST
+		this.manifestDBFile = FilePairManager.MANIFEST
 			.getEncryptedPath(backupLocation);
 
 	/* This check should never be reached in a normal situation. */
@@ -229,7 +230,7 @@ public class BackupManager extends Phone {
 	try {
 		if (iPhone.isEncrypted) {
 
-			/* If global debug is disabled, add files to cleanup. */
+		/* Attempt to perform decryption activities */
 		EncryptedFile contactsDB = new
 				EncryptedFile(FilePairManager.CONTACTS
 				.getEncryptedPath(self.backupLocation),
@@ -268,7 +269,6 @@ public class BackupManager extends Phone {
 		callLog.extract(FilePairManager.CALLS
 				.getDecryptedPath(self.restoreLocation));
 
-
 		/* XXX: Get XML data for the report. - Move to reporting.
 		File myPlist = new File(backupLocation + File.separator
 				+ "Manifest.plist");
@@ -283,6 +283,7 @@ public class BackupManager extends Phone {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} */
+
 		} else {
 			/* Could probably just be a different "new" manager. */
 			self.decryptedDatabaseFile = self.manifestDBFile;
@@ -326,50 +327,132 @@ public class BackupManager extends Phone {
 		/* Create the media file array. */
 		MediaList = self.createMediaArray();
 		updateProgress(0.75f, 1.0f);
-		/* XXX: Metadata data
-		 * Not implemented: NewBackup.writeMediaMDToFile();
+		/*
+		 * Read only to DB, separate connection, try-with-resources,
+		 * no read lock should be needed here IIRC.
 		 */
 		try {
-		/* Create and write contact list to file. */
-		ContactList = self.createContactArray();
-		self.writeContactsWeb(ContactList);
-		if (self.doReporting) {
-			self.writeContactsToFile(ContactList);
-		}
+			ThreadManager workers = new ThreadManager(6);
+			/* Create and write contact list to file. */
+			Runnable contactTask = () -> {
+				try {
+					ContactList = self.createContactArray();
+				} catch (ExceptionManager | SQLException e) {
+					catchHelper("Error reading contacts", e, true);
+				}
+				try {
+					self.writeContactsWeb(ContactList);
+				} catch (ExceptionManager | IOException e) {
+					catchHelper("Error reading contacts", e, true);
+				}
+				if (self.doReporting) {
+					try {
+						self.writeContactsToFile(ContactList);
+					} catch (ExceptionManager e) {
+						catchHelper("Error reading contacts", e, true);
+					}
+				}
+			};
+			workers.submitJob(contactTask, 0);
 
-		/* Create and write call history to file. */
-		callHistoryList = self.createCallHistory();
-		self.writeCalllogWeb(callHistoryList);
-		if (self.doReporting) {
-			self.writeCallLogToFile(callHistoryList);
-		}
+			/* Create and write call history to file. */
+			Runnable callHistoryTask = () -> {
+				try {
+					callHistoryList = self.createCallHistory();
+				} catch (ExceptionManager e) {
+					catchHelper("Error reading contacts", e, true);
+				}
+				try {
+					self.writeCalllogWeb(callHistoryList);
+				} catch (ExceptionManager e) {
+					catchHelper("Error reading contacts", e, true);
+				}
+				if (self.doReporting) {
+					try {
+						self.writeCallLogToFile(callHistoryList);
+					} catch (ExceptionManager e) {
+						catchHelper("Error reading contacts", e, true);
+					}
+				}
+			};
+			workers.submitJob(callHistoryTask, 1);
 
-		/* Create and write message history to file. */
-		MessageList = self.createMessageArray();
-		self.writeMessagesWeb(MessageList);
-		if (self.doReporting) {
-			self.writeMessageHistoryToFile(MessageList);
-		}
-		updateProgress(1.0f, 1.0f);
+			/* Create and write message history to file. */
+			Runnable messageHistoryTask = () -> {
+				try {
+					MessageList = self.createMessageArray();
+				} catch (SQLException | ExceptionManager e) {
+					catchHelper("Error reading contacts", e, true);
+				}
+				try {
+					self.writeMessagesWeb(MessageList);
+				} catch (ExceptionManager e) {
+					catchHelper("Error reading contacts", e, true);
+				}
+				if (self.doReporting) {
+					try {
+						self.writeMessageHistoryToFile(MessageList);
+					} catch (ExceptionManager e) {
+						catchHelper("Error reading contacts", e, true);
+					}
+				}
+			};
+			workers.submitJob(messageHistoryTask, 2);
+			updateProgress(1.0f, 1.0f);
 
-		/* Create and write the voice mail information to file. */
-		VMailList = self.createVMailArray();
-		self.writeVMailWeb(VMailList);
-		if (self.doReporting ) {
-			self.writeVMailToFile(VMailList);
-		}
+			/* Create and write the voice mail information to file. */
+			Runnable vmailTask = () -> {
+				try {
+					VMailList = self.createVMailArray();
+				} catch (NoSuchAlgorithmException | SQLException |
+						ExceptionManager | IOException e) {
+					catchHelper("Error reading contacts", e, true);
+				}
+				try {
+					self.writeVMailWeb(VMailList);
+				} catch (ExceptionManager | IOException e) {
+					catchHelper("Error reading contacts", e, true);
+				}
+				if (self.doReporting ) {
+					try {
+						self.writeVMailToFile(VMailList);
+					} catch (ExceptionManager e) {
+						catchHelper("Error reading contacts", e, true);
+					}
+				}
+			};
+			workers.submitJob(vmailTask, 3);
 
-		/*
-		 * Write Safari history to file (if it exists - it was created
-		 * in the encrypted section prior to now.
-		 */
-		if (iPhone.isEncrypted) {
-			SafariHistoryList = self.createSafariHistory();
-			self.writeSafariWeb(SafariHistoryList);
-			if (self.doReporting ) {
-				self.writeBrowserToFile(SafariHistoryList);
+			/*
+			 * Write Safari history to file (if it exists - it was created
+			 * in the encrypted section prior to now.
+			 */
+			if (iPhone.isEncrypted) {
+				Runnable safariTask = () -> {
+					try {
+						SafariHistoryList = self.createSafariHistory();
+					} catch (ExceptionManager e) {
+						catchHelper("Error reading contacts", e, true);
+					}
+					try {
+						self.writeSafariWeb(SafariHistoryList);
+					} catch (ExceptionManager | IOException e) {
+						catchHelper("Error reading contacts", e, true);
+					}
+					if (self.doReporting ) {
+						try {
+							self.writeBrowserToFile(SafariHistoryList);
+						} catch (ExceptionManager e) {
+							catchHelper("Error reading contacts", e, true);
+						}
+					}
+				};
+				workers.submitJob(safariTask, 4);
 			}
-		}
+
+			/* Wait about a minute for all shutdown. */
+			workers.shutdown();
+			workers.awaitTermination(30, TimeUnit.SECONDS);
 
 		/* If reporting is set, do the reporting here. */
 		if (self.doReporting) {
@@ -378,11 +461,13 @@ public class BackupManager extends Phone {
 					iPhone);
 			phoneReport.processMessages(MessageList);
 		}
+
 			updateMessage("Finishing up ...");
 		} catch (Exception e) {
 			throw new ExceptionManager("Critical Error decrypting files",
 					e, true);
 		}
+
 	} catch (ExceptionManager | SQLException e) {
 		/*
 		 * Inform user there was an error somewhere.
@@ -1578,5 +1663,10 @@ public class BackupManager extends Phone {
 	/* Is the backup encrypted? */
 	public Boolean getIsEncrypted() {
 		return this.isEncrypted;
+	}
+
+	private void catchHelper(String reason, Exception e, boolean fatal)
+			throws ExceptionManager {
+		throw new ExceptionManager(reason, e, fatal);
 	}
 }
