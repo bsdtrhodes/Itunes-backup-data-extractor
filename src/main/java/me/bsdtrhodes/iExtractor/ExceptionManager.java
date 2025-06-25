@@ -39,7 +39,13 @@ import java.util.logging.SimpleFormatter;
  * call exit.
  */
 
-public class ExceptionManager extends Exception {
+/*
+ * Self note: RuntimeException helps reduce boilerplate, and, from my
+ * reading, gives me cleaner code at the loss of, in my case, meaningful
+ * safety. If we need more checked v. unchecked error handling, it
+ * can be reverted to Exception.
+ */
+public class ExceptionManager extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = Logger.getLogger(ExceptionManager
 			.class.getName());
@@ -48,7 +54,8 @@ public class ExceptionManager extends Exception {
 		try {
 			Path logFilePath = Paths.get(System.getProperty("user.home"),
 					"iExtractor.log");
-			FileHandler logFile = new FileHandler(logFilePath.toString(), true);
+			FileHandler logFile = new FileHandler(logFilePath.toString(),
+					true);
 			logFile.setFormatter(new SimpleFormatter());
 			logFile.setLevel(Level.ALL);
 			LOGGER.addHandler(logFile);
@@ -63,8 +70,10 @@ public class ExceptionManager extends Exception {
 	        LOGGER.log(Level.WARNING, message);
 	}
 
-	public ExceptionManager(String message, Throwable cause, boolean fatal) {
-	        super("The backup manager encountered an error: " + message, cause);
+	public ExceptionManager(String message, Throwable cause,
+		boolean fatal) {
+	        super("The backup manager encountered an error: " + message,
+	        		cause);
 	        LOGGER.log(Level.SEVERE, cause.getMessage());
 	        if (fatal) {
 	        	WindowManager.critical(ContextManager.getPrimaryStage(),
