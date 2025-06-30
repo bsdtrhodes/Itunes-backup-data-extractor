@@ -46,11 +46,13 @@ package me.bsdtrhodes.iExtractor;
 public class Message {
 	private String ThreadID, FromPhone, ToPhone, ServiceType,
 	    MessageDate, MessageData;
-	private Boolean isFromMe;
+	private Boolean isFromMe, isGroup;
 
 	Message(String ThreadID, Boolean fromMe, String fromPhone, String
-			toPhone, String Service, String MessageDate, String Message) {
+			toPhone, String Service, String MessageDate, String Message,
+			boolean isGroup) {
 		this.ThreadID = ThreadID;
+		this.isGroup = isGroup;
 		this.isFromMe = fromMe;
 		this.FromPhone = fromPhone;
 		this.ToPhone = toPhone;
@@ -86,5 +88,9 @@ public class Message {
 
 	public String getMessageData() {
 		return this.MessageData;
+	}
+
+	public Boolean getMessageisGroup() {
+		return this.isGroup;
 	}
 }

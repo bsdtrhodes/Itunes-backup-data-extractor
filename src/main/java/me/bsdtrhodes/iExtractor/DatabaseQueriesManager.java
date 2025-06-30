@@ -94,19 +94,22 @@ public class DatabaseQueriesManager {
 	    }
 
 	    public static String getTextMessageQuery() {
-	    	return "SELECT COALESCE(m.cache_roomnames, h.id) ThreadId,"
-	    			+ " m.is_from_me IsFromMe, case when m.is_from_me = 1 then"
-	    			+ " m.account else h.id end as FromPhoneNumber, case when"
-	    			+ " m.is_from_me = 0 then m.account else COALESCE(h2.id, h.id)"
-	    			+ " end AS ToPhoneNumber ,m.service Service,"
-	    			+ " DATETIME((m.date / 1000000000) + 978307200, 'unixepoch',"
-	    			+ " 'localtime') AS TextDate ,m.text MessageText FROM message"
-	    			+ " AS m LEFT JOIN handle AS h on m.handle_id = h.rowid LEFT"
-	    			+ " JOIN chat AS c on m.cache_roomnames = c.room_name LEFT"
-	    			+ " JOIN chat_handle_join as ch on c.rowid = ch.chat_id LEFT"
-	    			+ " JOIN handle AS h2 on ch.handle_id = h2.rowid WHERE"
-	    			+ " (h2.service is null or m.service = h2.service) ORDER"
-	    			+ " BY 2, m.date";
+	    	return "SELECT COALESCE(m.cache_roomnames, h.id) AS ThreadId,"
+	    			+ " m.is_from_me AS IsFromMe, CASE WHEN m.is_from_me ="
+	    			+ " 1 THEN m.account ELSE h.id END AS FromPhoneNumber,"
+	    			+ " CASE WHEN m.is_from_me = 0 THEN m.account ELSE"
+	    			+ " COALESCE(h2.id, h.id) END AS ToPhoneNumber,"
+	    			+ " m.service AS Service,"
+	    			+ " DATETIME((m.date / 1000000000) + 978307200,"
+	    			+ " 'unixepoch', 'localtime') AS TextDate, m.text AS"
+	    			+ " MessageText, CASE  WHEN m.cache_roomnames IS NOT"
+	    			+ " NULL THEN 1 ELSE 0 END AS IsGroup FROM message AS"
+	    			+ " m LEFT JOIN handle AS h ON m.handle_id = h.rowid"
+	    			+ " LEFT JOIN chat AS c ON m.cache_roomnames ="
+	    			+ " c.room_name LEFT JOIN chat_handle_join AS ch ON"
+	    			+ " c.rowid = ch.chat_id LEFT JOIN handle AS h2 ON"
+	    			+ " ch.handle_id = h2.rowid WHERE (h2.service IS"
+	    			+ " NULL OR m.service = h2.service) ORDER BY 2, m.date";
 	    }
 
 	    public static String getVMailDataQuery() {

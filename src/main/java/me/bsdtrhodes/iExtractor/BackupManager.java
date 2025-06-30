@@ -42,8 +42,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -253,7 +257,6 @@ public class BackupManager extends Phone {
 				self.iPhone);
 		voicemailsDB.extract(FilePairManager.VOICEMAILS
 				.getDecryptedPath(self.restoreLocation));
-
 
 		EncryptedFile safariHistoryDB = new
 				EncryptedFile(FilePairManager.SAFARI
@@ -550,10 +553,10 @@ public class BackupManager extends Phone {
 	    }
 
 /*
-******************************************************************************
-* These methods deal with the various media files, media directories, and    *
-* extraction of media files.                                                 *
-******************************************************************************
+****************************************************************************
+* These methods deal with the various media files, media directories, and  *
+* extraction of media files.                                               *
+****************************************************************************
 */
 	    /* XXX: Migrate to Window Manager, it will need MediaHeir - see methods below*/
     	public void createMediaPane() throws ExceptionManager {
@@ -851,6 +854,7 @@ public class BackupManager extends Phone {
 		ExceptionManager {
 
 		ArrayList<Message> mList = new ArrayList<>();
+		Map<String, Set<Message>> messageThreads = new HashMap<>();
 
 		try (DatabaseFileManager dbMGR = new DatabaseFileManager(
 				FilePairManager.MESSAGES
@@ -873,20 +877,44 @@ public class BackupManager extends Phone {
 		    			.getString("Service")).orElse("Unknown");
 		    	String txtDate = Optional.ofNullable(msgResults
 		    			.getString("TextDate")).orElse("Unknown");
-		    	String msgData = Optional.ofNullable(msgResults
+		    	String tmpmsgData = Optional.ofNullable(msgResults
 		    			.getString("MessageText")).orElse("Unknown");
+		    	Boolean isGroup = msgResults.getInt("isGroup") == 1;
 
-		    	msgData = msgData.replace("\r", "");
-		    	msgData = msgData.replace("\n", "");
+		    	String msgData = tmpmsgData.replace("\r", "")
+		    			.replace("\n", "");
+
 		    	Boolean IsFromMe = false;
 		    	/* If it is from me, flip to true. */
 		    	if (FromMe == 1) {
 		    		IsFromMe = true;
 		    	}
+
 		    	Message tempmsg = new Message(ThreadId, IsFromMe, FromPhone,
-		    			ToPhone, Service, txtDate, msgData);
-		    	mList.add(tempmsg);
+		    			ToPhone, Service, txtDate, msgData, isGroup);
+		    	/* Try to reduce duplicates created by group chats */
+		    	if (isGroup) {
+		    		Set<Message> threadMessages = messageThreads
+		    				.getOrDefault(ThreadId, new HashSet<>());
+		    		if (! IsFromMe) {
+		    			boolean isDuplicate = threadMessages.stream()
+		    					.anyMatch(m ->
+		    			m.getMessageFromPhone().equals(FromPhone) &&
+		    			m.getMessageData().equals(msgData));
+		    			if (!isDuplicate) {
+	                        threadMessages.add(tempmsg);
+		    			}
+		    		}
+		    		messageThreads.put(ThreadId, threadMessages);
+		    	} else {
+		    		mList.add(tempmsg);
+		    	}
 		    }
+
+		    /* Convert map entries back into the list */
+		    for (Set<Message> threadMessages : messageThreads.values()) {
+	            mList.addAll(threadMessages);
+	        }
 		    msgResults.close();
 		} catch (Exception e) {
 			throw new ExceptionManager("Failed to read SMS history"
@@ -1437,7 +1465,7 @@ public class BackupManager extends Phone {
 */
 	/* Header for CSV message history file. */
 	private String getMessagesHeader() {
-		return "ThreadID,SentByMe,FromPhoneNumber,ToPhoneNumber,ServiceType,"
+		return "ThreadID,IsAGroup,SentByMe,FromPhoneNumber,ToPhoneNumber,ServiceType,"
 			+ "MessageDate,MessageData\n";
 	}
 
@@ -1455,6 +1483,11 @@ public class BackupManager extends Phone {
 			for (Message msg : MessageList) {
 				outputFile.append(msg.getMessageThreadID()).append(",");
 				/* Document message origin. */
+				if (msg.getMessageisGroup()) {
+					outputFile.append("Yes,");
+				} else {
+					outputFile.append("No,");
+				}
 				if (msg.getMessageIsFromMe()) {
 					outputFile.append("Yes,");
 				} else {
@@ -1486,12 +1519,17 @@ public class BackupManager extends Phone {
 				StandardCharsets.UTF_8)) {
 			msgFile.append(WebPageManager.header("Message History"));
 			msgFile.append(WebPageManager.beginTable("Message Thread ID",
+					"Is a Group Chat",
 					"Message Originates from Me", "Message Source",
 					"Message Destination", "Message Service Utilizied",
 					"Message Send/Rec Date", "Message Contents"));
+			String isaGroup = "No";
 			for (Message msg : msgList) {
+				if (msg.getMessageisGroup()) {
+					isaGroup = "Yes";
+				}
 				msgFile.append(WebPageManager.row(msg.getMessageThreadID(),
-						msg.getMessageIsFromMe().toString(),
+						isaGroup, msg.getMessageIsFromMe().toString(),
 						msg.getMessageFromPhone(),
 						msg.getMessageToPhone(), msg.getMessageService(),
 						msg.getMessageDate(), msg.getMessageData()));
